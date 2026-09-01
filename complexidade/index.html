@@ -113,6 +113,7 @@
     font-size:1.1rem; align-items:center; justify-content:center;
   }
 
+  body.menu-open{overflow:hidden;}
   #mobile-menu{
     display:none;
     position:fixed; inset:0; z-index:950;
@@ -551,25 +552,25 @@
   <section id="contando" class="wrap">
     <div class="eyebrow"><span class="idx">03</span> Exemplo guiado</div>
     <h2 class="title">Contando instruções: encontrando o maior valor de um array</h2>
-    <p class="lead">Para calcular o custo de um algoritmo matematicamente, contamos quantas <b style="color:var(--text)">instruções simples</b> — atribuições, acessos, comparações, incrementos, operações aritméticas — ele executa. Comandos de seleção como o <code style="color:var(--teal)">if</code> têm custo zero: não contam como instrução.</p>
+    <p class="lead">Para calcular o custo de um algoritmo matematicamente, contamos quantas <b style="color:var(--text)">instruções simples</b> — atribuições, acessos, comparações, incrementos, operações aritméticas — ele executa. Neste modelo didático, contamos atribuições, acessos, comparações, incrementos e operações aritméticas como instruções simples. O comando de seleção <code style="color:var(--teal)">if</code> não recebe uma instrução adicional, mas sua condição é contada.</p>
 
     <div class="code-panel">
       <div class="code-head"><span class="b b1"></span><span class="b b2"></span><span class="b b3"></span> maior-valor.c</div>
       <div class="code-lines">
         <div class="code-line"><span class="ln">1</span><span class="code">M <span class="kw">=</span> A[0]<span class="cm">;  // copia o 1º elemento para M</span></span><span class="cost">1 instrução</span></div>
         <div class="code-line"><span class="ln">2</span><span class="code"><span class="cm">// percorre o restante do array</span></span><span class="cost zero">custo 0</span></div>
-        <div class="code-line"><span class="ln">3</span><span class="code"><span class="kw">for</span> (i <span class="kw">=</span> 1; i <span class="kw">&lt;</span> n; i<span class="kw">++</span>)</span><span class="cost loop">2 + 2n</span></div>
+        <div class="code-line"><span class="ln">3</span><span class="code"><span class="kw">for</span> (i <span class="kw">=</span> 1; i <span class="kw">&lt;</span> n; i<span class="kw">++</span>)</span><span class="cost loop">2n</span></div>
         <div class="code-line"><span class="ln">4</span><span class="code">&nbsp;&nbsp;<span class="kw">if</span> (A[i] <span class="kw">&gt;=</span> M)</span><span class="cost zero">custo 0*</span></div>
         <div class="code-line"><span class="ln">5</span><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;M <span class="kw">=</span> A[i]<span class="cm">;</span></span><span class="cost">0 a n</span></div>
       </div>
     </div>
-    <p style="font-size:0.85rem; color:var(--muted-2); margin-top:-14px;">* o comando <code style="color:var(--teal)">if</code> em si tem custo zero — mas o acesso e a comparação <code style="color:var(--teal)">A[i] &gt;= M</code> contam como 1 instrução, executada n vezes.</p>
+    <p style="font-size:0.85rem; color:var(--muted-2); margin-top:-14px;">* Neste modelo, o <code style="color:var(--teal)">if</code> não recebe custo adicional; a condição <code style="color:var(--teal)">A[i] &gt;= M</code> é contada como uma comparação por iteração. A atribuição <code style="color:var(--teal)">M = A[i]</code> é contada apenas quando executada.</p>
 
     <div class="cost-tally">
       <div class="tally-chip"><b>Linha 1</b> — 1 instrução (execução única)</div>
-      <div class="tally-chip"><b>Inicialização do for</b> — 2 instruções (i = 1 e a 1ª comparação)</div>
-      <div class="tally-chip"><b>A cada iteração</b> — 2 instruções (i++ e a comparação seguinte), repetidas n vezes → 2n</div>
-      <div class="tally-chip result"><b>Fora do corpo do laço:</b> f(n) = 2n + 3</div>
+      <div class="tally-chip"><b>Inicialização do for</b> — 1 instrução (i = 1)</div>
+      <div class="tally-chip"><b>Controle do for</b> — n comparações de <code>i &lt; n</code> + (n−1) incrementos de <code>i++</code></div>
+      <div class="tally-chip result"><b>Controle + inicialização:</b> 1 + n + (n−1) = 2n</div>
     </div>
 
     <h3 class="subtitle" style="margin-top:44px;">O corpo do laço muda tudo: o pior caso</h3>
@@ -595,7 +596,7 @@
     </div>
 
     <div class="cost-tally" style="margin-top:26px;">
-      <div class="tally-chip result"><b>Pior caso (array crescente):</b> f(n) = 2n + 2n + 3 = 4n + 3</div>
+      <div class="tally-chip result"><b>Pior caso (array crescente):</b> T(n) = 2n + 2(n−1) = 4n − 2</div>
     </div>
   </section>
 
@@ -603,37 +604,37 @@
   <section id="assintotico" class="wrap">
     <div class="eyebrow"><span class="idx">04</span> Simplificando a função de custo</div>
     <h2 class="title">Comportamento assintótico: descartando o que não importa</h2>
-    <p class="lead">A função <b style="color:var(--text)">f(n) = 4n + 3</b> descreve o custo exato — mas nem todo termo é necessário para entender o que acontece quando n cresce muito. Se um algoritmo é mais rápido para entradas grandes, ele tende a continuar mais rápido também para entradas pequenas.</p>
+    <p class="lead">A função <b style="color:var(--text)">T(n) = 4n − 2</b> descreve o custo exato — mas nem todo termo é necessário para entender o que acontece quando n cresce muito. Para entradas pequenas, constantes e termos de menor ordem podem influenciar bastante o desempenho; a análise assintótica se concentra no comportamento para n suficientemente grande.</p>
 
     <h3 class="subtitle">Duas regras de descarte</h3>
     <div class="two-col">
       <div class="card">
         <h4>1 · Descartar constantes isoladas</h4>
-        <p style="max-width:none; margin-top:10px;">O termo <b>+3</b> não é afetado pelo valor de n — é apenas uma constante de inicialização. Pode ser removido sem alterar o comportamento de crescimento da função.</p>
+        <p style="max-width:none; margin-top:10px;">Termos constantes, como <b>+2</b>, não crescem com n. Eles podem ser ignorados ao classificar o crescimento assintótico, embora façam parte do custo exato.</p>
       </div>
       <div class="card">
         <h4>2 · Descartar constantes multiplicativas</h4>
-        <p style="max-width:none; margin-top:10px;">O <b>4</b> que multiplica n também é descartado: ele varia conforme a linguagem e o compilador (em Pascal, por exemplo, o acesso a um array inclui uma verificação de limites que não existe em C), e não representa a ideia do algoritmo.</p>
+        <p style="max-width:none; margin-top:10px;">Constantes multiplicativas, como o <b>4</b>, não alteram a classe assintótica. Elas podem depender do modelo de custo, da implementação, da linguagem e do hardware.</p>
       </div>
     </div>
 
     <div class="reduction">
-      <div class="step"><span class="out">4n + 3</span></div>
+      <div class="step"><span class="out">4n − 2</span></div>
       <span class="arrow">→</span>
-      <div class="step"><span class="out">4</span>n</div>
+      <div class="step"><span class="out">4n</span></div>
       <span class="arrow">→</span>
       <div class="step final">n</div>
     </div>
 
-    <p style="max-width:70ch;">O que sobra é o <b style="color:var(--text)">comportamento assintótico</b>: como f(n) se comporta quando n tende ao infinito. O termo de maior grau sempre domina — mesmo que outros termos tenham constantes maiores. Por isso, g(n) = 1000n + 500 acaba perdendo para h(n) = n² + n + 1 a partir de um certo n, apesar da constante 1000.</p>
+    <p style="max-width:70ch;">O que sobra é o <b style="color:var(--text)">comportamento assintótico</b>: como a função se comporta quando n cresce sem limite. Em uma função polinomial, o termo de maior grau domina o crescimento assintótico, mesmo que outros termos tenham constantes maiores. Por isso, g(n) = 1000n + 500 acaba perdendo para h(n) = n² + n + 1 a partir de um certo n, apesar da constante 1000.</p>
 
     <table class="growth-table">
       <thead><tr><th>Função de custo</th><th>Comportamento assintótico</th></tr></thead>
       <tbody>
-        <tr><td class="f">f(n) = 10⁵</td><td class="g">f(n) = 1</td></tr>
-        <tr><td class="f">f(n) = 15n + 2</td><td class="g">f(n) = n</td></tr>
-        <tr><td class="f">f(n) = n² + 5n + 2</td><td class="g">f(n) = n²</td></tr>
-        <tr><td class="f">f(n) = 5n³ + 200n² + 112</td><td class="g">f(n) = n³</td></tr>
+        <tr><td class="f">f(n) = 10⁵</td><td class="g">Θ(1)</td></tr>
+        <tr><td class="f">f(n) = 15n + 2</td><td class="g">Θ(n)</td></tr>
+        <tr><td class="f">f(n) = n² + 5n + 2</td><td class="g">Θ(n²)</td></tr>
+        <tr><td class="f">f(n) = 5n³ + 200n² + 112</td><td class="g">Θ(n³)</td></tr>
       </tbody>
     </table>
     <p style="font-size:0.85rem; color:var(--muted-2);">Regra prática: um programa sem laços custa f(n) = 1; um laço de 1 a n custa f(n) = n; dois laços aninhados custam f(n) = n²; e assim por diante.</p>
@@ -643,7 +644,7 @@
   <section id="crescimento" class="wrap">
     <div class="eyebrow"><span class="idx">✦</span> Visualização interativa</div>
     <h2 class="title">Veja as curvas de crescimento — e onde uma ultrapassa a outra</h2>
-    <p class="lead">Mova o controle para mudar o tamanho da entrada (n) e observe como cada classe de complexidade evolui. Clique nos rótulos da legenda para isolar curvas. A escala vertical é logarítmica — é a única forma de caber O(1) e O(n!) no mesmo gráfico.</p>
+    <p class="lead">Mova o controle para mudar o tamanho da entrada (n) e observe como cada classe de complexidade evolui. Clique nos rótulos da legenda para isolar curvas. O eixo vertical apresenta os valores reais dos custos em escala linear, sem transformação logarítmica.</p>
 
     <div class="chart-shell">
       <div class="chart-controls">
@@ -660,8 +661,8 @@
   <!-- 05 GRANDE-O -->
   <section id="grande-o" class="wrap">
     <div class="eyebrow"><span class="idx">05</span> A notação mais usada</div>
-    <h2 class="title">Notação Grande-O: o limite superior do pior caso</h2>
-    <p class="lead">Entre as formas de análise assintótica, a <b style="color:var(--text)">notação Grande-O (O)</b> é a mais conhecida. Ela descreve o custo do algoritmo no <b style="color:var(--text)">pior caso possível</b>, estabelecendo um teto que o algoritmo nunca ultrapassa.</p>
+    <h2 class="title">Notação Grande-O: um limite assintótico superior</h2>
+    <p class="lead">Entre as formas de análise assintótica, a <b style="color:var(--text)">notação Grande-O (O)</b> é a mais conhecida. Ela expressa um <b style="color:var(--text)">limite assintótico superior</b>. Quando analisamos o pior caso, podemos escrever esse pior caso em Big-O, mas Big-O não significa “pior caso”.</p>
 
     <div class="card accent-top" style="margin-top:20px;">
       <h4>Definição formal</h4>
@@ -670,10 +671,10 @@
     </div>
 
     <h3 class="subtitle" style="margin-top:40px;">Exemplo: selection sort</h3>
-    <p style="max-width:70ch;">O selection sort percorre um array de tamanho n em busca do menor valor e o move para a posição correta, repetindo o processo para cada posição seguinte. O laço interno executa n−1, depois n−2, ... até 1 vez — uma soma que resulta em <b style="color:var(--text)">S(n) = n(n−1)/2</b>.</p>
-    <p style="max-width:70ch;">Uma forma mais simples de obter um limite superior é imaginar uma versão <i>pior</i> do algoritmo — com o laço interno sempre executando n vezes, mesmo que isso desperdice iterações. Com dois laços aninhados de n execuções, a função de custo passa a ser <b style="color:var(--text)">f(n) = n²</b>.</p>
+    <p style="max-width:70ch;">O selection sort percorre um array de tamanho n em busca do menor valor e o move para a posição correta. O número de comparações realizadas pelo laço interno é n−1, depois n−2, ... até 1, cuja soma é <b style="color:var(--text)">S(n) = n(n−1)/2</b>. Portanto, o número de comparações é Θ(n²).</p>
+    <p style="max-width:70ch;">Como n(n−1)/2 ≤ n² para n ≥ 1, concluímos diretamente que o número de comparações é O(n²). O custo total do selection sort também é O(n²).</p>
 
-    <div class="tally-chip result" style="display:inline-block;">Conclusão: o selection sort é O(n²) — nunca pior do que n², assintoticamente.</div>
+    <div class="tally-chip result" style="display:inline-block;">Conclusão: o selection sort é O(n²); além disso, seu número de comparações é Θ(n²).</div>
   </section>
 
   <!-- 06 OUTRAS NOTAÇÕES -->
@@ -685,38 +686,38 @@
     <div class="notation-grid">
       <div class="notation-card lower">
         <div class="symbol">Ω</div>
-        <h5>Ômega — melhor caso</h5>
-        <p style="font-size:0.86rem; margin:0;">Descreve o limite assintótico <b style="color:var(--text)">inferior</b>: f(n) é no mínimo tão custosa quanto g(n).</p>
+        <h5>Ômega — limite assintótico inferior</h5>
+        <p style="font-size:0.86rem; margin:0;">Descreve o limite assintótico <b style="color:var(--text)">inferior</b>: f(n) cresce pelo menos tão rapidamente quanto g(n), a menos de uma constante positiva, para n suficientemente grande.</p>
         <small>f(n) é Ω(g(n)) se existem c, m &gt; 0 tais que f(n) ≥ c·g(n) para todo n ≥ m.</small>
       </div>
       <div class="notation-card">
         <div class="symbol">O</div>
-        <h5>Grande-O — pior caso</h5>
-        <p style="font-size:0.86rem; margin:0;">Descreve o limite assintótico <b style="color:var(--text)">superior</b>: f(n) nunca é pior do que g(n).</p>
+        <h5>Grande-O — limite assintótico superior</h5>
+        <p style="font-size:0.86rem; margin:0;">Descreve um limite assintótico <b style="color:var(--text)">superior</b>: a partir de certo n, f(n) não cresce mais rapidamente que uma constante multiplicada por g(n).</p>
         <small>f(n) é O(g(n)) se existem c, m &gt; 0 tais que f(n) ≤ c·g(n) para todo n ≥ m.</small>
       </div>
       <div class="notation-card tight">
-        <div class="symbol">θ</div>
+        <div class="symbol">Θ</div>
         <h5>Theta — limite exato</h5>
         <p style="font-size:0.86rem; margin:0;">Descreve o limite <b style="color:var(--text)">firme</b>: f(n) cresce exatamente como g(n), a menos de constantes.</p>
-        <small>f(n) é θ(g(n)) se existem c₁, c₂, m &gt; 0 tais que c₁·g(n) ≤ f(n) ≤ c₂·g(n) para todo n ≥ m.</small>
+        <small>f(n) é Θ(g(n)) se existem c₁, c₂, m &gt; 0 tais que c₁·g(n) ≤ f(n) ≤ c₂·g(n) para todo n ≥ m.</small>
       </div>
       <div class="notation-card lower">
         <div class="symbol">ω</div>
         <h5>Pequeno-ômega</h5>
-        <p style="font-size:0.86rem; margin:0;">Como Ω, mas mais restritiva: f(n) cresce estritamente mais rápido do que g(n), para <b style="color:var(--text)">qualquer</b> constante c.</p>
+        <p style="font-size:0.86rem; margin:0;">Mais restritiva que Ω: f(n) cresce estritamente mais rápido que g(n).</p>
         <small>f(n) é ω(g(n)) se, para toda constante c &gt; 0, existe m &gt; 0 tal que f(n) &gt; c·g(n) para todo n ≥ m.</small>
       </div>
       <div class="notation-card">
-        <div class="symbol">ο</div>
+        <div class="symbol">o</div>
         <h5>Pequeno-o</h5>
-        <p style="font-size:0.86rem; margin:0;">Como O, mas mais restritiva: f(n) cresce estritamente mais devagar do que g(n), para <b style="color:var(--text)">qualquer</b> constante c.</p>
-        <small>f(n) é ο(g(n)) se, para toda constante c &gt; 0, existe m &gt; 0 tal que f(n) &lt; c·g(n) para todo n ≥ m.</small>
+        <p style="font-size:0.86rem; margin:0;">Mais restritiva que O: f(n) cresce estritamente mais devagar que g(n).</p>
+        <small>f(n) é o(g(n)) se, para toda constante c &gt; 0, existe m &gt; 0 tal que f(n) &lt; c·g(n) para todo n ≥ m.</small>
       </div>
       <div class="notation-card">
         <div class="symbol">Σ</div>
         <h5>Regra da soma</h5>
-        <p style="font-size:0.86rem; margin:0;">Ao encadear dois algoritmos, o custo total é dado pelo maior deles.</p>
+        <p style="font-size:0.86rem; margin:0;">Ao executar dois trechos em sequência, os custos são somados; assintoticamente, o termo de maior crescimento domina.</p>
         <small>O(f(n)) + O(g(n)) = O(max(f(n), g(n)))</small>
       </div>
     </div>
@@ -731,17 +732,17 @@
   <section id="classes" class="wrap">
     <div class="eyebrow"><span class="idx">07</span> Hierarquia de crescimento</div>
     <h2 class="title">As classes de complexidade mais comuns</h2>
-    <p class="lead">Da mais rápida para a mais lenta — a mesma ordem que você viu <a href="#crescimento">no gráfico acima</a>.</p>
+    <p class="lead">Da menor para a maior taxa de crescimento assintótico — a mesma ordem apresentada <a href="#crescimento">no gráfico acima</a>.</p>
 
     <div class="class-list">
       <div class="class-row"><span class="notation">O(1)</span><span class="desc">Constante — número fixo de instruções, independente do tamanho da entrada.</span><span class="class-bar"><i style="width:3%"></i></span></div>
       <div class="class-row"><span class="notation">O(log n)</span><span class="desc">Logarítmica — típica de algoritmos que reduzem o problema pela metade a cada passo.</span><span class="class-bar"><i style="width:12%"></i></span></div>
       <div class="class-row"><span class="notation">O(n)</span><span class="desc">Linear — uma quantidade fixa de operações por elemento de entrada.</span><span class="class-bar"><i style="width:24%"></i></span></div>
-      <div class="class-row"><span class="notation">O(n log n)</span><span class="desc">Log-linear — algoritmos que particionam os dados, resolvem cada parte e depois combinam.</span><span class="class-bar"><i style="width:38%"></i></span></div>
+      <div class="class-row"><span class="notation">O(n log n)</span><span class="desc">Log-linear — algoritmos que realizam trabalho proporcional ao tamanho da entrada em cada um de vários níveis de processamento.</span><span class="class-bar"><i style="width:38%"></i></span></div>
       <div class="class-row"><span class="notation">O(n²)</span><span class="desc">Quadrática — comum quando dados são processados aos pares, com dois laços aninhados.</span><span class="class-bar"><i style="width:55%"></i></span></div>
-      <div class="class-row"><span class="notation">O(n³)</span><span class="desc">Cúbica — três estruturas de repetição aninhadas.</span><span class="class-bar"><i style="width:70%"></i></span></div>
+      <div class="class-row"><span class="notation">O(n³)</span><span class="desc">Cúbica — três laços aninhados, quando cada laço executa uma quantidade proporcional a n de vezes.</span><span class="class-bar"><i style="width:70%"></i></span></div>
       <div class="class-row"><span class="notation">O(2ⁿ)</span><span class="desc">Exponencial — comum em soluções de força bruta; pouco prática para entradas grandes.</span><span class="class-bar"><i style="width:88%"></i></span></div>
-      <div class="class-row"><span class="notation">O(n!)</span><span class="desc">Fatorial — força bruta no limite; cresce mais rápido que qualquer classe anterior.</span><span class="class-bar"><i style="width:100%"></i></span></div>
+      <div class="class-row"><span class="notation">O(n!)</span><span class="desc">Fatorial — crescimento extremamente rápido; para n suficientemente grande, cresce mais rapidamente que as classes anteriores da lista.</span><span class="class-bar"><i style="width:100%"></i></span></div>
     </div>
 
     <p style="margin-top:28px; font-family:var(--mono); font-size:0.95rem; color:var(--muted); text-align:center;">
@@ -762,8 +763,7 @@
       Prof. Clayton Kossoski<br>
       Disciplina de Análise de Algoritmos
     </div>
-  </div>
-</footer>
+  </div></footer>
 
 <button class="back-top" id="back-top" aria-label="Voltar ao topo">↑</button>
 
@@ -774,7 +774,8 @@
   const backTop = document.getElementById('back-top');
   function onScroll(){
     const h = document.documentElement;
-    const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    const maxScroll = h.scrollHeight - h.clientHeight;
+    const scrolled = maxScroll > 0 ? (h.scrollTop / maxScroll) * 100 : 0;
     progress.style.width = scrolled + '%';
     backTop.classList.toggle('show', h.scrollTop > 600);
   }
@@ -788,6 +789,7 @@
   const closeMenu = document.getElementById('close-menu');
   function toggleMenu(open){
     mobileMenu.classList.toggle('open', open);
+    document.body.classList.toggle('menu-open', open);
     menuBtn.setAttribute('aria-expanded', open ? 'true':'false');
   }
   menuBtn.addEventListener('click', ()=> toggleMenu(true));
@@ -811,11 +813,11 @@
 
   // ---- growth chart ----
   const funcs = [
-    {key:'O(1)',  color:'#64749c', calc: n => 1},
-    {key:'O(log n)', color:'#7a3fc2', calc: n => Math.max(Math.log2(n),0.01)},
+    {key:'O(1)', color:'#64749c', calc: n => 1},
+    {key:'O(log n)', color:'#7a3fc2', calc: n => Math.max(Math.log2(n),0)},
     {key:'O(n)', color:'#0e8f7c', calc: n => n},
-    {key:'O(n log n)', color:'#2f6fd1', calc: n => n*Math.max(Math.log2(n),0.01)},
-    {key:'O(n²)', color:'#c97a00', calc: n => n*n},
+    {key:'O(n log n)', color:'#2f6fd1', calc: n => n*Math.log2(n)},
+    {key:'O(n²)', color:'#c97a00', calc: n => Math.pow(n,2)},
     {key:'O(n³)', color:'#d9720d', calc: n => Math.pow(n,3)},
     {key:'O(2ⁿ)', color:'#dc5c47', calc: n => Math.pow(2,n)},
     {key:'O(n!)', color:'#c62d55', calc: n => factorial(n)},
@@ -827,23 +829,27 @@
     return r;
   }
 
-  const N_MAX = 20;
+  const N_MAX = 10;
   const W = 900, H = 380;
-  const padL = 46, padR = 20, padT = 20, padB = 34;
+  const padL = 78, padR = 20, padT = 20, padB = 48;
   const plotW = W - padL - padR;
   const plotH = H - padT - padB;
 
-  // precompute log10 domain
+  // Escala vertical LINEAR: os valores das funções são usados diretamente, // sem logaritmo, raiz, normalização ou qualquer outra transformação.
   let maxVal = 0;
   for(let n=1;n<=N_MAX;n++){
-    funcs.forEach(f => { const v = f.calc(n); if(v > maxVal) maxVal = v; });
+    funcs.forEach(f => {
+      const v = f.calc(n);
+      if(v > maxVal) maxVal = v;
+    });
   }
-  const maxLog = Math.log10(maxVal + 1);
 
-  function xFor(n){ return padL + (n-1)/(N_MAX-1) * plotW; }
+  function xFor(n){
+    return padL + (n-1)/(N_MAX-1) * plotW;
+  }
+
   function yFor(v){
-    const lv = Math.log10(v+1);
-    return padT + plotH - (lv/maxLog) * plotH;
+    return padT + plotH - (v/maxVal) * plotH;
   }
 
   const svg = document.getElementById('growth-svg');
@@ -851,49 +857,93 @@
   const activeSet = new Set(funcs.map(f=>f.key));
 
   function fmtValue(v){
-    if(v >= 1e6) return v.toExponential(2).replace('+','');
+    if(v >= 1e18) return v.toExponential(2);
+    if(v >= 1e15) return v.toExponential(2);
+    if(v >= 1e12) return (v/1e12).toFixed(2) + ' tri';
+    if(v >= 1e9) return (v/1e9).toFixed(2) + ' bi';
+    if(v >= 1e6) return (v/1e6).toFixed(2) + ' mi';
     return Math.round(v).toLocaleString('pt-BR');
   }
 
   function render(){
     svg.innerHTML = '';
 
-    // grid lines (horizontal, log-scaled decades)
+    // ---- eixo Y linear ----
     const gridGroup = document.createElementNS(svgNS,'g');
-    for(let p=0; p<=maxLog; p++){
-      const y = yFor(Math.pow(10,p)-1+1);
+
+    // Divisões igualmente espaçadas em valor absoluto; a escala Y é linear.
+    const gridSteps = 5;
+
+    for(let i=0;i<=gridSteps;i++){
+      const value = (maxVal / gridSteps) * i;
+      const y = yFor(value);
+
       const line = document.createElementNS(svgNS,'line');
-      line.setAttribute('x1', padL); line.setAttribute('x2', W-padR);
-      line.setAttribute('y1', y); line.setAttribute('y2', y);
+      line.setAttribute('x1', padL);
+      line.setAttribute('x2', W-padR);
+      line.setAttribute('y1', y);
+      line.setAttribute('y2', y);
       line.setAttribute('stroke', 'rgba(20,40,90,0.10)');
       line.setAttribute('stroke-width','1');
       gridGroup.appendChild(line);
+
       const label = document.createElementNS(svgNS,'text');
-      label.setAttribute('x', 6); label.setAttribute('y', y+4);
-      label.setAttribute('fill', '#3d4a6b'); label.setAttribute('font-size','10');
+      label.setAttribute('x', padL-8);
+      label.setAttribute('y', y+4);
+      label.setAttribute('fill', '#3d4a6b');
+      label.setAttribute('font-size','10');
+      label.setAttribute('text-anchor','end');
       label.setAttribute('font-family','JetBrains Mono, monospace');
-      label.textContent = '10' + (p>0 ? '^'+p : '');
+      label.textContent = fmtValue(value);
       gridGroup.appendChild(label);
     }
+
     svg.appendChild(gridGroup);
 
-    // x axis label
+    // ---- marcações do eixo X ----
+    for(let n=1;n<=N_MAX;n++){
+      const x = xFor(n);
+
+      const tick = document.createElementNS(svgNS,'line');
+      tick.setAttribute('x1', x);
+      tick.setAttribute('x2', x);
+      tick.setAttribute('y1', H-padB);
+      tick.setAttribute('y2', H-padB+5);
+      tick.setAttribute('stroke', '#9aa6bf');
+      svg.appendChild(tick);
+
+      const label = document.createElementNS(svgNS,'text');
+      label.setAttribute('x', x);
+      label.setAttribute('y', H-padB+17);
+      label.setAttribute('fill', '#3d4a6b');
+      label.setAttribute('font-size','9');
+      label.setAttribute('text-anchor','middle');
+      label.setAttribute('font-family','JetBrains Mono, monospace');
+      label.textContent = n;
+      svg.appendChild(label);
+    }
+
+    // ---- rótulo do eixo X ----
     const xlabel = document.createElementNS(svgNS,'text');
-    xlabel.setAttribute('x', W/2); xlabel.setAttribute('y', H-6);
-    xlabel.setAttribute('fill', '#3d4a6b'); xlabel.setAttribute('font-size','11');
+    xlabel.setAttribute('x', W/2);
+    xlabel.setAttribute('y', H-6);
+    xlabel.setAttribute('fill', '#3d4a6b');
+    xlabel.setAttribute('font-size','11');
     xlabel.setAttribute('text-anchor','middle');
     xlabel.setAttribute('font-family','JetBrains Mono, monospace');
-    xlabel.textContent = 'tamanho da entrada (n) — escala vertical logarítmica';
+    xlabel.textContent = 'tamanho da entrada (n)';
     svg.appendChild(xlabel);
 
-    // curves
+    // ---- curvas ----
     funcs.forEach(f=>{
       if(!activeSet.has(f.key)) return;
+
       let d = '';
       for(let n=1;n<=N_MAX;n++){
         const x = xFor(n), y = yFor(f.calc(n));
         d += (n===1 ? 'M' : 'L') + x.toFixed(1) + ' ' + y.toFixed(1) + ' ';
       }
+
       const path = document.createElementNS(svgNS,'path');
       path.setAttribute('d', d);
       path.setAttribute('fill','none');
@@ -904,24 +954,34 @@
       svg.appendChild(path);
     });
 
-    // current-n marker line
+    // ---- marcador do n atual ----
     const n = parseInt(document.getElementById('n-slider').value, 10);
     const mx = xFor(n);
+
     const mline = document.createElementNS(svgNS,'line');
-    mline.setAttribute('x1', mx); mline.setAttribute('x2', mx);
-    mline.setAttribute('y1', padT); mline.setAttribute('y2', H-padB);
-    mline.setAttribute('stroke', '#c97a00'); mline.setAttribute('stroke-width','1.4');
+    mline.setAttribute('x1', mx);
+    mline.setAttribute('x2', mx);
+    mline.setAttribute('y1', padT);
+    mline.setAttribute('y2', H-padB);
+    mline.setAttribute('stroke', '#c97a00');
+    mline.setAttribute('stroke-width','1.4');
     mline.setAttribute('stroke-dasharray','4 4');
     svg.appendChild(mline);
 
+    // ---- pontos no n atual ----
     funcs.forEach(f=>{
       if(!activeSet.has(f.key)) return;
+
       const val = f.calc(n);
       const cx = xFor(n), cy = yFor(val);
+
       const dot = document.createElementNS(svgNS,'circle');
-      dot.setAttribute('cx', cx); dot.setAttribute('cy', cy); dot.setAttribute('r', 4.5);
+      dot.setAttribute('cx', cx);
+      dot.setAttribute('cy', cy);
+      dot.setAttribute('r', 4.5);
       dot.setAttribute('fill', f.color);
-      dot.setAttribute('stroke', '#ffffff'); dot.setAttribute('stroke-width','1.6');
+      dot.setAttribute('stroke', '#ffffff');
+      dot.setAttribute('stroke-width','1.6');
       svg.appendChild(dot);
     });
 
@@ -931,15 +991,24 @@
   function renderLegend(n){
     const legend = document.getElementById('chart-legend');
     legend.innerHTML = '';
+
     funcs.forEach(f=>{
       const item = document.createElement('div');
       item.className = 'legend-item' + (activeSet.has(f.key) ? '' : ' off');
-      item.innerHTML = '<span class="legend-swatch" style="background:'+f.color+'"></span>' +
-        f.key + '<span class="legend-value">' + fmtValue(f.calc(n)) + '</span>';
+
+      item.innerHTML =
+        '<span class="legend-swatch" style="background:'+f.color+'"></span>' +
+        f.key +
+        '<span class="legend-value">' +
+        fmtValue(f.calc(n)) +
+        '</span>';
+
       item.addEventListener('click', ()=>{
-        if(activeSet.has(f.key)) activeSet.delete(f.key); else activeSet.add(f.key);
+        if(activeSet.has(f.key)) activeSet.delete(f.key);
+        else activeSet.add(f.key);
         render();
       });
+
       legend.appendChild(item);
     });
   }

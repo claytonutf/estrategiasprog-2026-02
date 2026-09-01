@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bubble Sort em C — Ordenação por Bolha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #f6faf9;
+    --bg-panel: #ffffff;
+    --bg-alt: #eaf3f2;
+    --ink: #0f2a2e;
+    --ink-soft: #3f5d5f;
+    --line: #cfe2e0;
+    --teal: #0c7c78;
+    --teal-deep: #095e5c;
+    --blue: #1f7ea6;
+    --amber: #c98a2c;
+    --coral: #c65b4e;
+    --sorted: #10222a;
+    --compare: #cfe2e0;
+    --radius: 6px;
+    --maxw: 780px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,h2,h3{
+    font-family: 'Fraunces', serif;
+    color: var(--ink);
+    line-height: 1.15;
+    margin: 0 0 .4em 0;
+    font-weight: 600;
+  }
+
+  a{ color: var(--teal-deep); }
+
+  .wrap{
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  code, .mono{
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #eef7f6 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+    padding: 56px 0 44px 0;
+  }
+  .hero .wrap{ position: relative; z-index: 2; }
+  .bubbles-bg{
+    position:absolute; inset:0; z-index:1; pointer-events:none;
+  }
+  .bubbles-bg span{
+    position:absolute;
+    bottom:-40px;
+    display:block;
+    border-radius:50%;
+    background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.9), rgba(12,124,120,.16) 65%, rgba(12,124,120,.05) 100%);
+    border:1px solid rgba(12,124,120,.18);
+    animation: rise linear infinite;
+  }
+  @keyframes rise{
+    0%{ transform: translateY(0) translateX(0); opacity:0; }
+    8%{ opacity:.9; }
+    100%{ transform: translateY(-620px) translateX(var(--drift,12px)); opacity:0; }
+  }
+
+  .eyebrow-inst{
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-bottom: 18px;
+  }
+  .eyebrow-inst strong{ color: var(--teal-deep); }
+
+  .hero h1{
+    font-size: clamp(34px, 5.4vw, 54px);
+    letter-spacing: -0.01em;
+    max-width: 11ch;
+  }
+  .hero p.lead{
+    max-width: 46ch;
+    color: var(--ink-soft);
+    font-size: 18px;
+    margin-top: 14px;
+  }
+  .hero .credit{
+    margin-top: 28px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+    display:flex; gap: 24px; flex-wrap: wrap;
+  }
+  .hero .credit b{ color: var(--ink); display:block; font-weight:600; }
+
+  /* ---------- SECTIONS ---------- */
+  section{ padding: 46px 0; }
+  section + section{ border-top: 1px solid var(--line); }
+
+  section > .wrap > h2{
+    font-size: 27px;
+    margin-bottom: .55em;
+  }
+
+  p{ max-width: 68ch; }
+  ul{ max-width: 62ch; padding-left: 1.2em; }
+  li{ margin-bottom: .3em; }
+
+  .example-row{
+    display:flex; gap: 14px; flex-wrap: wrap;
+    margin: 18px 0;
+  }
+  .chip-set{
+    display:flex; gap:6px;
+  }
+  .chip{
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 6px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .example-row .label{
+    align-self:center;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+  .status-bad{ color: var(--coral); }
+  .status-good{ color: var(--teal-deep); }
+
+  .two-col{
+    display:grid; grid-template-columns: 1fr 1fr; gap: 28px;
+    margin-top: 18px;
+  }
+  @media (max-width: 640px){ .two-col{ grid-template-columns: 1fr; } }
+
+  .card{
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+  .card h3{ font-size: 17px; margin-bottom: .5em; }
+  .card p{ font-size: 15px; color: var(--ink-soft); margin: 0; }
+
+  .stability-example{
+    margin-top: 16px;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .stability-row{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .stability-row .verdict{ font-size:14px; }
+
+  /* ---------- CODE BLOCK ---------- */
+  .code-panel{
+    background: var(--ink);
+    color: #dff2ee;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 20px 0;
+    box-shadow: 0 8px 24px rgba(15,42,46,0.12);
+  }
+  .code-title{
+    background: rgba(255,255,255,.06);
+    padding: 10px 18px;
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    letter-spacing:.01em;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .code-title em{ font-style: italic; opacity:.85; }
+  pre.code{
+    margin:0;
+    padding: 16px 0;
+    overflow-x:auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.75;
+  }
+  pre.code .ln{
+    display:block;
+    padding: 0 20px;
+  }
+  pre.code .ln.active{ background: rgba(255,255,255,.09); }
+  pre.code .num{
+    display:inline-block; width: 26px;
+    color: rgba(223,242,238,.35);
+    user-select:none;
+  }
+  .kw{ color:#7fd9c9; }
+  .fn{ color:#8ec9f0; }
+  .num-lit{ color:#e7b978; }
+  .cm{ color: rgba(223,242,238,.45); font-style: italic; }
+
+  /* ---------- DEMO ---------- */
+  .demo-panel{
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px 22px 24px 22px;
+    margin-top: 10px;
+  }
+  .demo-controls{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    margin-bottom: 20px;
+  }
+  .demo-controls button{
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight:600;
+    font-size: 14px;
+    padding: 9px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--teal-deep);
+    background: var(--teal);
+    color: #fff;
+    cursor:pointer;
+    transition: background .15s ease, transform .1s ease;
+  }
+  .demo-controls button:hover{ background: var(--teal-deep); }
+  .demo-controls button:active{ transform: translateY(1px); }
+  .demo-controls button.secondary{
+    background: transparent;
+    color: var(--teal-deep);
+  }
+  .demo-controls button.secondary:hover{ background: var(--bg-alt); }
+  .demo-controls button:disabled{
+    opacity:.45; cursor:not-allowed;
+  }
+  .demo-controls .status{
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-left:auto;
+  }
+
+  .bars-area{
+    position:relative;
+    height: 220px;
+    display:flex;
+    align-items:flex-end;
+    gap: 14px;
+    padding: 0 6px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .bar{
+    position:relative;
+    flex:1;
+    background: var(--bg-alt);
+    border: 1px solid var(--line);
+    border-radius: 6px 6px 3px 3px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding-top: 8px;
+    font-family:'JetBrains Mono', monospace;
+    font-weight:600;
+    font-size: 14px;
+    color: var(--ink);
+    transition: background .25s ease, border-color .25s ease, transform .45s cubic-bezier(.3,.9,.4,1.1), color .25s ease;
+  }
+  .bar.compare{ background: var(--compare); border-color: var(--blue); }
+  .bar.swap{ background: var(--amber); border-color: var(--amber); color:#fff; }
+  .bar.sorted{ background: var(--sorted); border-color: var(--sorted); color:#dff2ee; }
+
+  .demo-log{
+    margin-top: 16px;
+    min-height: 46px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+  }
+  .demo-log .pass{ color: var(--teal-deep); font-weight:600; }
+
+  .legend{
+    display:flex; gap:16px; flex-wrap:wrap;
+    margin-top:14px;
+    font-size: 13px; color: var(--ink-soft);
+  }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .swatch{ width:12px; height:12px; border-radius:3px; display:inline-block; }
+
+  /* ---------- COMPLEXITY ---------- */
+  .complexity-grid{
+    display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    margin-top: 18px;
+  }
+  @media (max-width: 700px){ .complexity-grid{ grid-template-columns: 1fr; } }
+  .complexity-card{
+    background: var(--bg-panel);
+    border:1px solid var(--line);
+    border-left: 4px solid var(--teal);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+  }
+  .complexity-card.worst{ border-left-color: var(--coral); }
+  .complexity-card.avg{ border-left-color: var(--amber); }
+  .complexity-card .bigo{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight:600;
+    color: var(--ink);
+  }
+  .complexity-card .cap{ font-size:14px; color: var(--ink-soft); margin-top:4px; }
+
+  footer{
+    padding: 34px 0 50px 0;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+  footer .wrap{ border-top: 1px solid var(--line); padding-top: 20px; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="bubbles-bg" id="bubblesBg"></div>
+  <div class="wrap">
+    <div class="eyebrow-inst"><strong>Universidade Tecnológica Federal do Paraná</strong> · Estrutura de Dados</div>
+    <h1>Ordenação em C: o algoritmo Bubble Sort</h1>
+    <p class="lead">Como reorganizar um conjunto de dados comparando e trocando vizinhos, até que cada valor encontre seu lugar — na teoria e em código C.</p>
+    <div class="credit">
+      <div><b>Professor</b>Clayton Kossoski</div>
+      <div><b>Tema</b>Algoritmos de ordenação interna</div>
+      <div><b>Linguagem</b>C</div>
+    </div>
+  </div>
+</header>
+
+<section id="definicao">
+  <div class="wrap">
+    <h2>O que é ordenação?</h2>
+    <p>Ordenar é o ato de colocar um conjunto de dados em uma ordem predefinida. A ordenação permite que o acesso aos dados seja feito de forma mais eficiente.</p>
+
+    <div class="example-row">
+      <div class="chip-set">
+        <div class="chip">5</div><div class="chip">2</div><div class="chip">1</div><div class="chip">3</div><div class="chip">4</div>
+      </div>
+      <div class="label status-bad">fora de ordem</div>
+    </div>
+    <div class="example-row">
+      <div class="chip-set">
+        <div class="chip">1</div><div class="chip">2</div><div class="chip">3</div><div class="chip">4</div><div class="chip">5</div>
+      </div>
+      <div class="label status-good">ordenado</div>
+    </div>
+
+    <p>A ordenação é feita com base em uma <strong>chave</strong>: o campo do item usado na comparação, que define se um elemento vem antes ou depois de outro no conjunto ordenado. Qualquer tipo de chave pode ser usado, desde que exista uma regra de ordenação bem definida.</p>
+
+    <div class="two-col">
+      <div class="card">
+        <h3>Tipo de chave</h3>
+        <p><strong>Numérica</strong> — 1, 2, 3, 4, 5<br><strong>Lexicográfica</strong> (ordem alfabética) — Ana, André, Bianca, Ricardo</p>
+      </div>
+      <div class="card">
+        <h3>Direção</h3>
+        <p><strong>Crescente</strong> — 1, 2, 3, 4, 5<br><strong>Decrescente</strong> — 5, 4, 3, 2, 1</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="classificacao">
+  <div class="wrap">
+    <h2>Ordenação interna e externa</h2>
+    <p>Os algoritmos de ordenação também se classificam pela forma como acessam os dados durante o processo.</p>
+    <div class="two-col">
+      <div class="card">
+        <h3>Interna (in-place)</h3>
+        <p>O conjunto de dados cabe inteiro na memória principal. Qualquer elemento pode ser acessado imediatamente — é o caso do bubble sort.</p>
+      </div>
+      <div class="card">
+        <h3>Externa</h3>
+        <p>O conjunto não cabe na memória principal e fica em memória secundária (por exemplo, um arquivo). Os elementos são acessados sequencialmente ou em blocos.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:32px; font-size:19px;">Estabilidade</h3>
+    <p>Um algoritmo é <strong>estável</strong> quando a ordem relativa de elementos com chaves iguais não muda durante a ordenação.</p>
+    <div class="stability-example">
+      <div class="stability-row">
+        <span class="label" style="min-width:15ch; color:var(--ink-soft); font-size:14px;">dados não ordenados</span>
+        <div class="chip-set">
+          <div class="chip">5a</div><div class="chip">2</div><div class="chip">5b</div><div class="chip">3</div><div class="chip">4</div><div class="chip">1</div>
+        </div>
+      </div>
+      <div class="stability-row">
+        <span class="label" style="min-width:15ch; color:var(--ink-soft); font-size:14px;">ordenação estável</span>
+        <div class="chip-set">
+          <div class="chip">1</div><div class="chip">2</div><div class="chip">3</div><div class="chip">4</div><div class="chip">5a</div><div class="chip">5b</div>
+        </div>
+        <span class="verdict status-good">5a mantém-se antes de 5b</span>
+      </div>
+      <div class="stability-row">
+        <span class="label" style="min-width:15ch; color:var(--ink-soft); font-size:14px;">ordenação não estável</span>
+        <div class="chip-set">
+          <div class="chip">1</div><div class="chip">2</div><div class="chip">3</div><div class="chip">4</div><div class="chip">5b</div><div class="chip">5a</div>
+        </div>
+        <span class="verdict status-bad">a ordem original se perdeu</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="bubble-sort">
+  <div class="wrap">
+    <h2>Bubble sort — ordenação por “bolha”</h2>
+    <p>O nome remete a bolhas flutuando na água em direção ao topo, até encontrarem seu próprio nível — o que corresponde à ordenação crescente.</p>
+    <p>A cada passagem, o algoritmo compara pares de valores em posições consecutivas do array e os troca quando estão fora de ordem. Isso empurra, uma posição por vez, o maior valor da porção ainda não ordenada até seu lugar correto. Repetindo esse processo, o array inteiro é ordenado.</p>
+
+    <div class="code-panel">
+      <div class="code-title">Método <em>bubble sort</em> em C</div>
+      <pre class="code" id="codeBlock"><span class="ln" data-ln="1"><span class="num">01</span><span class="kw">void</span> <span class="fn">bubbleSort</span>(<span class="kw">int</span> *V, <span class="kw">int</span> N){</span>
+<span class="ln" data-ln="2"><span class="num">02</span>&nbsp;&nbsp;<span class="kw">int</span> i, continua, aux, fim = N;</span>
+<span class="ln" data-ln="3"><span class="num">03</span>&nbsp;&nbsp;<span class="kw">do</span>{</span>
+<span class="ln" data-ln="4"><span class="num">04</span>&nbsp;&nbsp;&nbsp;&nbsp;continua = <span class="num-lit">0</span>;</span>
+<span class="ln" data-ln="5"><span class="num">05</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">for</span>(i = <span class="num-lit">0</span>; i &lt; fim-<span class="num-lit">1</span>; i++){</span>
+<span class="ln" data-ln="6"><span class="num">06</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span>(V[i] &gt; V[i+1]</span>
+<span class="ln" data-ln="7"><span class="num">07</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{aux = V[i];</span>
+<span class="ln" data-ln="8"><span class="num">08</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V[i] = V[i+1];</span>
+<span class="ln" data-ln="9"><span class="num">09</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;V[i+1] = aux;</span>
+<span class="ln" data-ln="10"><span class="num">10</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;continua = i;</span>
+<span class="ln" data-ln="11"><span class="num">11</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span>
+<span class="ln" data-ln="12"><span class="num">12</span>&nbsp;&nbsp;&nbsp;&nbsp;}</span>
+<span class="ln" data-ln="13"><span class="num">13</span>&nbsp;&nbsp;&nbsp;&nbsp;fim--;</span>
+<span class="ln" data-ln="14"><span class="num">14</span>&nbsp;&nbsp;}<span class="kw">while</span>(continua != <span class="num-lit">0</span>);</span>
+<span class="ln" data-ln="15"><span class="num">15</span>}</span></pre>
+    </div>
+
+    <p>O <code>do-while</code> encerra quando <code>continua</code> permanece igual a zero — ou seja, quando uma passagem inteira não realiza nenhuma troca (linha 4 zera a variável; a linha 10 a atualiza a cada troca). Essa verificação permite encerrar o algoritmo mais cedo se o array já estiver ordenado. A variável <code>fim</code> diminui a cada passagem (linha 13), já que o maior valor de cada rodada já está no seu lugar e não precisa mais ser comparado.</p>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="wrap">
+    <h2>Veja o algoritmo em ação</h2>
+    <p>Cada passagem compara pares vizinhos, troca os que estão fora de ordem e "empurra" o maior valor da rodada até sua posição final — como uma bolha subindo até seu nível.</p>
+
+    <div class="demo-panel">
+      <div class="demo-controls">
+        <button id="btnPlay">▶ Ordenar</button>
+        <button id="btnStep" class="secondary">Passo a passo</button>
+        <button id="btnReset" class="secondary">Novo array</button>
+        <span class="status" id="demoStatus">Pronto para ordenar</span>
+      </div>
+
+      <div class="bars-area" id="barsArea"></div>
+
+      <div class="legend">
+        <span><span class="swatch" style="background:var(--compare); border:1px solid var(--blue);"></span>comparando</span>
+        <span><span class="swatch" style="background:var(--amber);"></span>trocando</span>
+        <span><span class="swatch" style="background:var(--sorted);"></span>posição final</span>
+      </div>
+
+      <div class="demo-log" id="demoLog">Clique em “Ordenar” ou avance passo a passo para acompanhar cada comparação.</div>
+    </div>
+  </div>
+</section>
+
+<section id="complexidade">
+  <div class="wrap">
+    <h2>Custo do algoritmo</h2>
+    <p>O bubble sort é simples de entender e implementar, mas sua eficiência cai rapidamente à medida que o número de elementos cresce — por isso não é recomendado para grandes volumes de dados. Considerando um array com N elementos:</p>
+
+    <div class="complexity-grid">
+      <div class="complexity-card">
+        <div class="bigo">O(N)</div>
+        <div class="cap">Melhor caso — array já ordenado</div>
+      </div>
+      <div class="complexity-card avg">
+        <div class="bigo">O(N²)</div>
+        <div class="cap">Caso médio</div>
+      </div>
+      <div class="complexity-card worst">
+        <div class="bigo">O(N²)</div>
+        <div class="cap">Pior caso — array em ordem inversa</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Universidade Tecnológica Federal do Paraná — Professor Clayton Kossoski · Material didático sobre ordenação interna e o algoritmo bubble sort.
+  </div>
+</footer>
+
+<script>
+// ---------- bolhas de fundo do hero ----------
+(function(){
+  const host = document.getElementById('bubblesBg');
+  const n = 14;
+  for(let i=0;i<n;i++){
+    const s = document.createElement('span');
+    const size = 8 + Math.random()*26;
+    s.style.width = size+'px';
+    s.style.height = size+'px';
+    s.style.left = (Math.random()*100)+'%';
+    s.style.setProperty('--drift', (Math.random()*40-20)+'px');
+    s.style.animationDuration = (7 + Math.random()*8)+'s';
+    s.style.animationDelay = (Math.random()*10)+'s';
+    host.appendChild(s);
+  }
+})();
+
+// ---------- demo bubble sort ----------
+(function(){
+  const barsArea = document.getElementById('barsArea');
+  const logEl = document.getElementById('demoLog');
+  const statusEl = document.getElementById('demoStatus');
+  const btnPlay = document.getElementById('btnPlay');
+  const btnStep = document.getElementById('btnStep');
+  const btnReset = document.getElementById('btnReset');
+
+  const initial = [23, 4, 67, -8, 21];
+  let bars = [];
+  let playing = false;
+  let fim = 0;
+  let i = 0;
+  let continuaFlag = 0; // reflete "houve troca nesta passagem?" (0/1)
+  let passNumber = 1;
+
+  // escala a altura pelo VALOR real (não pelo módulo) — assim um valor menor
+  // (inclusive negativo) sempre resulta em barra mais baixa que um maior,
+  // preservando a relação de ordem que o próprio algoritmo está comparando.
+  const MIN_H = 40, MAX_H = 190;
+  function heightFor(v, min, max){
+    if(max === min) return (MIN_H + MAX_H) / 2;
+    return MIN_H + ((v - min) / (max - min)) * (MAX_H - MIN_H);
+  }
+
+  // cada barra guarda seu próprio valor (dataset.value) e altura de forma permanente;
+  // trocar dois elementos move as barras de posição, nunca reescreve o número de uma barra.
+  function renderBars(values){
+    barsArea.innerHTML = '';
+    bars = [];
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    values.forEach((v)=>{
+      const bar = document.createElement('div');
+      bar.className = 'bar';
+      bar.style.height = heightFor(v, min, max)+'px';
+      bar.textContent = v;
+      bar.dataset.value = v;
+      barsArea.appendChild(bar);
+      bars.push(bar);
+    });
+  }
+
+  function resetState(values){
+    fim = values.length;
+    i = 0;
+    continuaFlag = 0;
+    passNumber = 1;
+    playing = false;
+    renderBars(values);
+    logEl.innerHTML = 'Clique em “Ordenar” ou avance passo a passo para acompanhar cada comparação.';
+    statusEl.textContent = 'Pronto para ordenar';
+    btnPlay.disabled = false;
+    btnStep.disabled = false;
+    btnPlay.textContent = '▶ Ordenar';
+  }
+
+  function clearBarClasses(){
+    bars.forEach(b=> b.classList.remove('compare','swap'));
+  }
+
+  function markSortedTail(){
+    for(let k = fim; k < bars.length; k++){
+      bars[k].classList.add('sorted');
+    }
+  }
+
+  // troca a POSIÇÃO de duas barras (técnica FLIP), preservando o valor e a
+  // altura de cada uma — evita o número ficar diferente da altura da barra.
+  function swapBars(idxA, idxB){
+    const barA = bars[idxA];
+    const barB = bars[idxB];
+
+    const rectA1 = barA.getBoundingClientRect();
+    const rectB1 = barB.getBoundingClientRect();
+
+    barsArea.insertBefore(barB, barA); // barA vinha antes de barB
+
+    const rectA2 = barA.getBoundingClientRect();
+    const rectB2 = barB.getBoundingClientRect();
+
+    const deltaA = rectA1.left - rectA2.left;
+    const deltaB = rectB1.left - rectB2.left;
+
+    barA.style.transition = 'transform 0s';
+    barB.style.transition = 'transform 0s';
+    barA.style.transform = 'translateX('+deltaA+'px)';
+    barB.style.transform = 'translateX('+deltaB+'px)';
+
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        barA.style.transition = 'transform .35s cubic-bezier(.3,.9,.4,1.1), background .25s ease, border-color .25s ease, color .25s ease';
+        barB.style.transition = 'transform .35s cubic-bezier(.3,.9,.4,1.1), background .25s ease, border-color .25s ease, color .25s ease';
+        barA.style.transform = 'translateX(0)';
+        barB.style.transform = 'translateX(0)';
+      });
+    });
+
+    bars[idxA] = barB;
+    bars[idxB] = barA;
+  }
+
+  // executa uma única comparação (um "passo" do for interno)
+  function singleStep(){
+    if(fim <= 1){
+      finishSorting();
+      return false;
+    }
+    if(i >= fim - 1){
+      // fim da passagem: decide se continua
+      fim--;
+      markSortedTail();
+      if(continuaFlag === 0){
+        finishSorting();
+        return false;
+      }
+      i = 0;
+      continuaFlag = 0;
+      passNumber++;
+      logEl.innerHTML = '<span class="pass">Passagem '+passNumber+'</span> — variável fim reduzida, comparações reiniciam em i = 0';
+      return true;
+    }
+
+    clearBarClasses();
+    bars[i].classList.add('compare');
+    bars[i+1].classList.add('compare');
+    markSortedTail();
+
+    const vi = Number(bars[i].dataset.value);
+    const vj = Number(bars[i+1].dataset.value);
+
+    if(vi > vj){
+      bars[i].classList.add('swap');
+      bars[i+1].classList.add('swap');
+      swapBars(i, i+1);
+      continuaFlag = 1;
+      logEl.innerHTML = 'i='+i+'&nbsp;&nbsp;V[i] &gt; V[i+1] → <strong>trocar</strong> ('+vi+' ↔ '+vj+')';
+    } else {
+      logEl.innerHTML = 'i='+i+'&nbsp;&nbsp;V[i] ≤ V[i+1] → manter';
+    }
+    i++;
+    return true;
+  }
+
+  function finishSorting(){
+    clearBarClasses();
+    bars.forEach(b=> b.classList.add('sorted'));
+    logEl.innerHTML = '<span class="pass">Ordenação concluída</span> — nenhuma troca na última passagem, o array está ordenado.';
+    statusEl.textContent = 'Ordenado';
+    playing = false;
+    btnPlay.disabled = true;
+    btnStep.disabled = true;
+    btnPlay.textContent = '✓ Ordenado';
+  }
+
+  function stepOnce(){
+    const went = singleStep();
+    statusEl.textContent = 'fim = '+fim+', i = '+i;
+    return went;
+  }
+
+  async function playAll(){
+    if(playing) return;
+    playing = true;
+    btnStep.disabled = true;
+    btnPlay.textContent = 'Ordenando…';
+    while(playing){
+      const cont = stepOnce();
+      await new Promise(r=>setTimeout(r, 650));
+      if(!cont) break;
+    }
+    btnStep.disabled = false;
+  }
+
+  btnPlay.addEventListener('click', playAll);
+  btnStep.addEventListener('click', ()=>{ if(!playing) stepOnce(); });
+  btnReset.addEventListener('click', ()=>{
+    const shuffled = initial.slice().sort(()=>Math.random()-0.5);
+    resetState(shuffled);
+  });
+
+  resetState(initial);
+})();
+</script>
+
+</body>
+</html>
